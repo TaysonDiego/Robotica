@@ -1,0 +1,107 @@
+'********************************************************************
+'* Programa.: TESTE166 - Motor de passo bipolar com meio passo.     *
+'* Versão...: 1.1                                                   *
+'* Autor....: Prof. Amadeu Zanon Neto.                              *
+'* Data.....: Agosto/2024.                                          *
+'* Descrição: Modelo para aprendizado de uso de motor de passo      *
+'*            bipolar com controle de posição de bobina.            *  
+'*            Controle de meio passo. 0.9°                          *
+'********************************************************************
+program TESTE166
+dim tempoOn            as integer ' Controle de tempo de manutenção de bobina ligada.
+dim bobina             as integer ' Controle da bobina energizada no momento.
+dim b1, b2, b3, b4, b5 as boolean ' Detecção de borda dos botões de ângulo de giro.
+
+'********************************************************************
+' Procedure para pulsar a quantidade de vezes necessária para girar *
+' no ângulo selecionado no botão. Ex.: 360° --> 400 pulsos.         *
+'********************************************************************
+sub procedure gira(dim qtePulsos as integer)
+dim contaPulso     as integer
+    for contaPulso = 1 to qtePulsos
+        inc(bobina)
+        if bobina > 8 then bobina=1 end if
+        if bobina=1 then PORTC=%00001001 end if
+        if bobina=2 then PORTC=%00001000 end if
+        if bobina=3 then PORTC=%00001100 end if
+        if bobina=4 then PORTC=%00000100 end if
+        if bobina=5 then PORTC=%00000110 end if
+        if bobina=6 then PORTC=%00000010 end if
+        if bobina=7 then PORTC=%00000011 end if
+        if bobina=8 then PORTC=%00000001 end if
+        vdelay_ms(tempoOn)
+    next contaPulso
+end sub
+
+main:
+TRISA=%11111111
+TRISB=%01111111
+TRISC=%00000000
+INTCON=%00000000
+ANSEL=%00000000
+ANSELH=%00000000
+
+PORTC=0         ' Desliga todos os pinos da porta C. Motor fica livre.
+bobina=0        ' Zera o controle a bobina
+tempoOn=50      ' Tempo de manutenção de bobina ativada.
+                ' Utilize 50 ms para simulação.
+                ' Para gravar no MCU utilize no mínimo 5 ms.
+
+executa:
+        '*********************************************
+        ' Botão para 360° --> 400 pulsos.            *
+        '*********************************************
+        if PORTA.0 = 1 then
+           if b1 = false then
+              b1=true
+              gira(400)
+           end if
+        end if
+        if PORTA.0 = 0 then b1=false end if
+
+        '*********************************************
+        ' Botão para 180° --> 200 pulsos.            *
+        '*********************************************
+        if PORTA.1 = 1 then
+           if b2 = false then
+              b2=true
+              gira(200)
+           end if
+        end if
+        if PORTA.1 = 0 then b2=false end if
+        
+        '*********************************************
+        ' Botão para 90° --> 100 pulsos.             *
+        '*********************************************
+        if PORTA.2 = 1 then
+           if b3 = false then
+              b3=true
+              gira(100)
+           end if
+        end if
+        if PORTA.2 = 0 then b3=false end if
+        
+        '*********************************************
+        ' Botão para 45° --> 50 pulsos.              *
+        '*********************************************
+        if PORTA.3 = 1 then
+           if b4 = false then
+              b4=true
+              gira(50)
+           end if
+        end if
+        if PORTA.3 = 0 then b4=false end if
+        
+        '*********************************************
+        ' Botão para 0.9° --> 1 pulso.               *
+        '*********************************************
+        if PORTA.4 = 1 then
+           if b5 = false then
+              b5=true
+              gira(1)
+           end if
+        end if
+        if PORTA.4 = 0 then b5=false end if
+
+        goto executa
+end.

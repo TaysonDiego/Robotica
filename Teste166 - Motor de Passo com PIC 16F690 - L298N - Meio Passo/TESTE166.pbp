@@ -1,0 +1,35 @@
+[DeviceName]
+Value=P16F690
+[DeviceClock]
+Value=4
+[MainUnit]
+Value=TESTE166.pbas
+[DeviceFlags]
+Count=8
+Value0=_IESO_OFF = $3BFF
+Value1=_BOR_OFF = $3CFF
+Value2=_CPD_OFF = $3FFF
+Value3=_CP_OFF = $3FFF
+Value4=_MCLRE_OFF = $3FDF
+Value5=_PWRTE_ON = $3FEF
+Value6=_INTRC_OSC_NOCLKOUT = $3FFC
+Value7=_EXTRC_OSC_NOCLKOUT = $3FFE
+[BuildSimDebug]
+Build=0
+SimDebug=0
+[ProjectFiles]
+Count=0
+[OtherFiles]
+Count=0
+Value0=C:\Salesiano 2025\UniSalesiano\Semestre 2\Elétrica 10T - Lab Robótica Industrial\Material Robótica Industrial\Modelos para motores de passo\Teste166 - Motor de Passo com PIC 16F690 - L298N - Meio Passo\TESTE166.pbas
+[TabIndex]
+Value=0
+[SearchPath]
+Count=5
+Value0=C:\Program Files (x86)\Mikroelektronika\mikroBasic\Defs\
+Value1=C:\Program Files (x86)\Mikroelektronika\mikroBasic\Uses\p16\
+Value2=C:\Salesiano 2025\UniSalesiano\Semestre 2\Elétrica 10T - Lab Robótica Industrial\Material Robótica Industrial\Modelos para motores de passo\Teste166 - Motor de Passo com PIC 16F690 - L298N - Meio Passo\
+Value3=D:\Microcontrolador - Programas\MikroBasic\Teste166 - Motor de Passo com PIC 16F690 - L298N - Meio Passo\
+Value4=D:\Salesiano 2025\UniSalesiano\Semestre 2\Comp 10T - Robótica Industrial\Material Robótica Industrial\Modelos para motores de passo\Teste166 - Motor de Passo com PIC 16F690 - L298N - Meio Passo\
+[EEPROMinfo]
+isused=0

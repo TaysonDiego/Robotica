@@ -1,0 +1,20 @@
+main
+	Div_16x16_S
+		Div_16x16_S_L
+	Mul_16x16_S
+	USART_Init
+	gira
+		VDelay_ms
+			Mul_32x32_U
+		passoEsquerda
+			atualizaPorta
+		passoDireita
+			atualizaPorta
+	IntToStr
+		Div_16x16_S
+			Div_16x16_S_L
+	USART_Read
+	USART_Data_Ready
+	USART_Write
+	Usart_Write_Text
+		USART_Write

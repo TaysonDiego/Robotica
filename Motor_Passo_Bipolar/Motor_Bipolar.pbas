@@ -1,0 +1,141 @@
+program Motor_Bipolar
+
+dim tempoOn         as integer
+dim bobina          as integer
+dim passos          as integer
+dim angulo          as integer
+
+dim comando         as string[10]
+dim textoAngulo     as string[6]
+dim caractere       as char
+dim i               as byte
+dim posicao         as byte
+
+sub procedure atualizaPorta()
+    select case bobina
+        case 1 PORTC = %00001001
+        case 2 PORTC = %00001000
+        case 3 PORTC = %00001100
+        case 4 PORTC = %00000100
+        case 5 PORTC = %00000110
+        case 6 PORTC = %00000010
+        case 7 PORTC = %00000011
+        case 8 PORTC = %00000001
+    end select
+end sub
+
+sub procedure passoDireita()
+    inc(bobina)
+    if bobina > 8 then
+        bobina = 1
+    end if
+    atualizaPorta()
+end sub
+
+sub procedure passoEsquerda()
+    dec(bobina)
+    if bobina < 1 then
+        bobina = 8
+    end if
+    atualizaPorta()
+end sub
+
+sub procedure gira(dim qtePulsos as integer, dim sentido as byte)
+    dim contaPulso as integer
+
+    for contaPulso = 1 to qtePulsos
+
+        if sentido = 0 then
+            passoDireita()
+        else
+            passoEsquerda()
+        end if
+
+        vdelay_ms(tempoOn)
+    next contaPulso
+
+
+end sub
+
+main:
+    TRISA  = %11111111
+    TRISB  = %01111111
+    TRISC  = %00000000
+    INTCON = %00000000
+    ANSEL  = %00000000
+    ANSELH = %00000000
+
+    PORTC   = 0
+    bobina  = 0
+    posicao = 0
+    tempoOn = 50
+
+    Usart_Init(9600)
+    Delay_ms(100)
+
+    Usart_Write_Text("--- CONTROLE MOTOR BIPOLAR L298N (MEIO-PASSO) ---")
+    Usart_Write(13)
+    Usart_Write(10)
+    Usart_Write_Text("> ")
+
+executa:
+
+    if usart_data_ready() = 1 then
+        caractere = usart_read()
+
+        if caractere = 10 then
+            goto executa
+        end if
+
+        if caractere = 13 then
+            comando[posicao] = 0
+
+            angulo = 0
+            for i = 0 to posicao - 1
+                if (comando[i] >= "0") and (comando[i] <= "9") then
+                    angulo = (angulo * 10) + (comando[i] - "0")
+                end if
+            next i
+
+            passos = (angulo * 10) / 9
+
+            if passos > 0 then
+                IntToStr(angulo, textoAngulo)
+
+                if (comando[0] = "D") or (comando[0] = "d") then
+                    Usart_Write(13)
+                    Usart_Write(10)
+                    Usart_Write_Text("Girando DIREITA ")
+                    Usart_Write_Text(textoAngulo)
+                    gira(passos, 0)
+                else if (comando[0] = "E") or (comando[0] = "e") then
+                    Usart_Write(13)
+                    Usart_Write(10)
+                    Usart_Write_Text("Girando ESQUERDA ")
+                    Usart_Write_Text(textoAngulo)
+                    gira(passos, 1)
+                end if
+                end if
+            end if
+
+            posicao = 0
+            for i = 0 to 9
+                comando[i] = 0
+            next i
+
+            Usart_Write(13)
+            Usart_Write(10)
+            Usart_Write_Text("> ")
+
+        else
+
+            if posicao < 9 then
+                comando[posicao] = caractere
+                inc(posicao)
+                usart_write(caractere)
+            end if
+        end if
+    end if
+
+    goto executa
+end.

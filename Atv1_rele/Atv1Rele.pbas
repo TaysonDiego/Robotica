@@ -1,0 +1,83 @@
+program Atv1Rele
+
+dim borda1, borda2 as boolean
+dim ligado as boolean
+dim direcao as boolean
+dim tecla as integer
+main:
+TRISA=%11111111
+TRISB=%11111111
+TRISC=%00000000
+INTCON=%00000000
+ANSEL=%00000000
+ANSELH=%00000000
+
+PORTC=0
+borda1=false
+borda2=false
+ligado=false
+direcao=false
+PORTC.0 = 1
+
+USART_INIT(9600)
+
+executa:
+        if PORTA.0 = 1 then
+           if borda1 = false then
+              borda1 = true
+              ligado = not ligado
+           end if
+        end if
+        if PORTA.0 = 0 then borda1 = false end if
+        
+        
+        if PORTA.1 = 1 then
+           if borda2 = false then
+              borda2 = true
+              PORTC.0 = 0
+              PORTC.1 = 0
+              delay_ms(5000)
+              direcao = not direcao
+           end if
+        end if
+        if PORTA.1 = 0 then borda2 = false end if
+        
+        
+        if ligado = false then
+            PORTC.0 = 0
+            PORTC.1 = 0
+        else
+
+            if direcao = true then
+                PORTC.0 = 0
+                PORTC.1 = 1
+            else
+                PORTC.0 = 1
+                PORTC.1 = 0
+            end if
+
+    end if
+    if USART_Data_Ready() = 1 then
+
+        tecla = USART_Read()
+
+        if tecla = 76 then
+            ligado = true
+        end if
+
+        if tecla = 68 then
+            ligado = false
+        end if
+
+        if tecla = 82 then
+            PORTC.0 = 0
+            PORTC.1 = 0
+            delay_ms(2000)
+            direcao = not direcao
+        end if
+
+    end if
+        
+        
+        goto executa
+end.

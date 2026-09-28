@@ -1,0 +1,15 @@
+main
+	Div_16x16_S
+		Div_16x16_S_L
+	Mul_16x16_S
+	USART_Init
+	ADC_read
+		Delay_22us
+	IntToStr
+		Div_16x16_S
+			Div_16x16_S_L
+	USART_Read
+	USART_Data_Ready
+	USART_Write
+	Usart_Write_Text
+		USART_Write

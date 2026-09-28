@@ -1,0 +1,580 @@
+program PWM
+
+dim duty1          as byte
+dim duty2          as byte
+
+dim ligado1        as boolean
+dim ligado2        as boolean
+
+dim sentido1       as boolean
+dim sentido2       as boolean
+
+dim borda          as boolean
+
+dim modoPot        as boolean
+dim bordaModo      as boolean
+
+dim potenciometro  as word
+
+dim pwmContador    as byte
+
+dim rx             as byte
+
+dim potencia1 as integer
+dim potencia2 as integer
+
+dim texto1 as String[6]
+dim texto2 as String[6]
+
+
+'====================================================
+' INICIALIZACAO
+'====================================================
+
+main:
+
+TRISA = %11111111
+TRISB = %01111111
+TRISC = %00000000
+
+INTCON = %00000000
+
+' RB4 / AN10
+ANSEL  = %00000000
+ANSELH = %00000100
+
+PORTA = 0
+PORTB = 0
+PORTC = 0
+
+
+
+'====================================================
+' USART
+'====================================================
+
+USART_Init(9600)
+
+Delay_ms(100)
+
+
+'====================================================
+' VALORES INICIAIS
+'====================================================
+
+duty1 = 255
+duty2 = 255
+
+ligado1 = false
+ligado2 = false
+
+sentido1 = false
+sentido2 = false
+
+borda = false
+bordaModo = false
+
+modoPot = false
+
+pwmContador = 0
+
+
+USART_Write_Text("SISTEMA INICIADO")
+USART_Write(13)
+USART_Write(10)
+
+
+'====================================================
+' LOOP PRINCIPAL
+'====================================================
+
+executa:
+
+
+'====================================================
+' COMUNICACAO SERIAL
+'====================================================
+
+if USART_Data_Ready() = 1 then
+
+    rx = USART_Read()
+
+
+    '-----------------------------------------------
+    ' 1 = LIGA/DESLIGA MOTOR 1
+    '-----------------------------------------------
+
+    if rx = "1" then
+
+        if ligado1 = false then
+            ligado1 = true
+        else
+            ligado1 = false
+        end if
+
+    end if
+
+
+    '-----------------------------------------------
+    ' 2 = LIGA/DESLIGA MOTOR 2
+    '-----------------------------------------------
+
+    if rx = "2" then
+
+        if ligado2 = false then
+            ligado2 = true
+        else
+            ligado2 = false
+        end if
+
+    end if
+
+
+    '-----------------------------------------------
+    ' 3 = REVERSAO MOTOR 1
+    '-----------------------------------------------
+
+    if rx = "3" then
+
+        if sentido1 = false then
+            sentido1 = true
+        else
+            sentido1 = false
+        end if
+
+    end if
+
+
+    '-----------------------------------------------
+    ' 4 = REVERSAO MOTOR 2
+    '-----------------------------------------------
+
+    if rx = "4" then
+
+        if sentido2 = false then
+            sentido2 = true
+        else
+            sentido2 = false
+        end if
+
+    end if
+
+
+    '-----------------------------------------------
+    ' 5 = PWM 25%
+    '-----------------------------------------------
+
+    if rx = "5" then
+
+        duty1 = 64
+        duty2 = 64
+
+    end if
+
+
+    '-----------------------------------------------
+    ' 6 = PWM 50%
+    '-----------------------------------------------
+
+    if rx = "6" then
+
+        duty1 = 128
+        duty2 = 128
+
+    end if
+
+
+    '-----------------------------------------------
+    ' 7 = PWM 100%
+    '-----------------------------------------------
+
+    if rx = "7" then
+
+        duty1 = 255
+        duty2 = 255
+
+    end if
+
+
+    '-----------------------------------------------
+    ' 8 = MODO POTENCIOMETRO
+    '-----------------------------------------------
+
+    if rx = "8" then
+
+        modoPot = true
+
+        USART_Write_Text("MODO POTENCIOMETRO")
+        USART_Write(13)
+        USART_Write(10)
+
+    end if
+
+
+    '-----------------------------------------------
+    ' 9 = MODO BOTOES
+    '-----------------------------------------------
+
+    if rx = "9" then
+
+        modoPot = false
+
+        USART_Write_Text("MODO BOTOES")
+        USART_Write(13)
+        USART_Write(10)
+
+    end if
+
+
+'-----------------------------------------------
+' S = STATUS
+'-----------------------------------------------
+
+if rx = "S" then
+
+    '================================================
+    ' MOTOR 1
+    '================================================
+
+    USART_Write_Text("MOTOR 1: ")
+
+    if ligado1 = true then
+        USART_Write_Text("ON")
+    else
+        USART_Write_Text("OFF")
+    end if
+
+    USART_Write(13)
+    USART_Write(10)
+
+
+    '================================================
+    ' SENTIDO MOTOR 1
+    '================================================
+
+    USART_Write_Text("SENTIDO M1: ")
+
+    if sentido1 = false then
+        USART_Write_Text("HORARIO")
+    else
+        USART_Write_Text("ANTI-HORARIO")
+    end if
+
+    USART_Write(13)
+    USART_Write(10)
+
+
+    '================================================
+    ' POTENCIA MOTOR 1
+    '================================================
+
+    USART_Write_Text("POTENCIA M1: ")
+
+    ' Converte 0-255 para porcentagem
+    potencia1 = (duty2 * 100) / 255
+    IntToStr(potencia1, texto1)
+    USART_Write_Text(texto1)
+
+    USART_Write_Text("%")
+
+    USART_Write(13)
+    USART_Write(10)
+
+
+    '================================================
+    ' MOTOR 2
+    '================================================
+
+    USART_Write_Text("MOTOR 2: ")
+
+    if ligado2 = true then
+        USART_Write_Text("ON")
+    else
+        USART_Write_Text("OFF")
+    end if
+
+    USART_Write(13)
+    USART_Write(10)
+
+
+    '================================================
+    ' SENTIDO MOTOR 2
+    '================================================
+
+    USART_Write_Text("SENTIDO M2: ")
+
+    if sentido2 = false then
+        USART_Write_Text("HORARIO")
+    else
+        USART_Write_Text("ANTI-HORARIO")
+    end if
+
+    USART_Write(13)
+    USART_Write(10)
+
+
+    '================================================
+    ' POTENCIA MOTOR 2
+    '================================================
+
+    USART_Write_Text("POTENCIA M2: ")
+    
+    potencia2 = (duty2 * 100) / 255
+    IntToStr(potencia2, texto2)
+    USART_Write_Text(texto2)
+
+    USART_Write_Text("%")
+
+    USART_Write(13)
+    USART_Write(10)
+
+
+    '================================================
+    ' MODO
+    '================================================
+
+    USART_Write_Text("MODO: ")
+
+    if modoPot = true then
+        USART_Write_Text("POTENCIOMETRO")
+    else
+        USART_Write_Text("BOTOES")
+    end if
+
+    USART_Write(13)
+    USART_Write(10)
+
+    USART_Write_Text("--------------------")
+    USART_Write(13)
+    USART_Write(10)
+
+end if
+
+end if
+
+
+'====================================================
+' RA4 - TROCA DO MODO
+'
+' Aperta uma vez:
+'   BOTOES -> POTENCIOMETRO
+'
+' Aperta novamente:
+'   POTENCIOMETRO -> BOTOES
+'====================================================
+
+if PORTA.4 = 1 then
+
+    if bordaModo = false then
+
+        bordaModo = true
+
+        if modoPot = false then
+            modoPot = true
+        else
+            modoPot = false
+        end if
+
+    end if
+
+else
+
+    bordaModo = false
+
+end if
+
+
+'====================================================
+' RA0 - LIGA/DESLIGA OS DOIS MOTORES
+'====================================================
+
+if PORTA.0 = 1 then
+
+    if borda = false then
+
+        borda = true
+
+        if ligado1 = false then
+
+            ligado1 = true
+            ligado2 = true
+
+        else
+
+            ligado1 = false
+            ligado2 = false
+
+        end if
+
+    end if
+
+else
+
+    borda = false
+
+end if
+
+
+'====================================================
+' CONTROLE DOS BOTOES
+'====================================================
+
+if modoPot = false then
+
+
+    '-----------------------------------------------
+    ' RA1 = 100%
+    '-----------------------------------------------
+
+    if PORTA.1 = 1 then
+
+        duty1 = 255
+        duty2 = 255
+
+    end if
+
+
+    '-----------------------------------------------
+    ' RA2 = 50%
+    '-----------------------------------------------
+
+    if PORTA.2 = 1 then
+
+        duty1 = 128
+        duty2 = 128
+
+    end if
+
+
+    '-----------------------------------------------
+    ' RA3 = 25%
+    '-----------------------------------------------
+
+    if PORTA.3 = 1 then
+
+        duty1 = 64
+        duty2 = 64
+
+    end if
+
+end if
+
+
+'====================================================
+' POTENCIOMETRO
+' RB4 / AN10
+'====================================================
+
+if modoPot = true then
+
+    potenciometro = ADC_Read(10)
+
+    ' ADC 0-1023
+    ' PWM 0-255
+
+    duty1 = potenciometro >> 2
+    duty2 = potenciometro >> 2
+
+end if
+
+
+'====================================================
+' MOTOR 1
+'====================================================
+
+if ligado1 = true then
+
+    if sentido1 = false then
+
+        PORTC.0 = 1
+        PORTC.1 = 0
+
+    else
+
+        PORTC.0 = 0
+        PORTC.1 = 1
+
+    end if
+
+else
+
+    PORTC.0 = 0
+    PORTC.1 = 0
+
+end if
+
+
+'====================================================
+' MOTOR 2
+'====================================================
+
+if ligado2 = true then
+
+    if sentido2 = false then
+
+        PORTC.2 = 1
+        PORTC.3 = 0
+
+    else
+
+        PORTC.2 = 0
+        PORTC.3 = 1
+
+    end if
+
+else
+
+    PORTC.2 = 0
+    PORTC.3 = 0
+
+end if
+
+
+'====================================================
+' PWM POR SOFTWARE
+'====================================================
+
+pwmContador = pwmContador + 1
+
+
+'====================================================
+' PWM MOTOR 1 - RC4 / ENA
+'====================================================
+
+if ligado1 = true then
+
+    if pwmContador < duty1 then
+        PORTC.4 = 1
+    else
+        PORTC.4 = 0
+    end if
+
+else
+
+    PORTC.4 = 0
+
+end if
+
+
+'====================================================
+' PWM MOTOR 2 - RC5 / ENB
+'====================================================
+
+if ligado2 = true then
+
+    if pwmContador < duty2 then
+        PORTC.5 = 1
+    else
+        PORTC.5 = 0
+    end if
+
+else
+
+    PORTC.5 = 0
+
+end if
+
+
+goto executa
+
+end.
